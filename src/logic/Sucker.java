@@ -21,7 +21,8 @@ public class Sucker implements Callable<ArrayList<String>> {
 	public Sucker(Config conf, String fbid, Crawler crawl, SQLHelper todb) {
 		this.conf = conf;
 		this.fbid = fbid;
-		this.crawl = crawl;
+		// This causes trouble with plenty of race conditions, workaround
+		this.crawl = new Crawler(conf);
 		this.todb = todb;
 	}
 

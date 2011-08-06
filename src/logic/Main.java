@@ -100,6 +100,12 @@ public class Main {
 		// Write Graph
 		String graph = null;
 		try {
+			try {
+				todb.setConfig(conf);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			todb.resetGraphDB();
 			todb.createGraphDB(null);
 			GraphCreator creator = new GraphCreator(conf);

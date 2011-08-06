@@ -56,14 +56,14 @@ public class SQLHelper {
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, details.get("fbid"));
 		resultSet = preparedStatement.executeQuery();
-		String fbid = null;
-		while (resultSet.next()) {
-			fbid = resultSet.getString(1);
-		}
-		
-		if (fbid != null && details.get("fbid").compareTo(fbid) == 0) {
-			return;
-		}
+//		String fbid = null;
+//		while (resultSet.next()) {
+//			fbid = resultSet.getString(1);
+//		}
+//		
+//		if (fbid != null && details.get("fbid").compareTo(fbid) == 0) {
+//			return;
+//		}
 		
 		sql = "insert into users(name, fbid, sex, pic, crawltime, single, lives, birth, mail, wants, origin) values(?,?,?,?,?,?,?,?,?,?,?)";
 		preparedStatement = connect.prepareStatement(sql);
@@ -88,14 +88,14 @@ public class SQLHelper {
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, fbid);
 		resultSet = preparedStatement.executeQuery();
-		String checkfbid = null;
-		while (resultSet.next()) {
-			checkfbid = resultSet.getString(1);
-		}
-		if (checkfbid != null && checkfbid.compareTo(fbid) == 0) {
-			//System.out.println("not inserting");
-			return;
-		}
+//		String checkfbid = null;
+//		while (resultSet.next()) {
+//			checkfbid = resultSet.getString(1);
+//		}
+//		if (checkfbid != null && checkfbid.compareTo(fbid) == 0) {
+//			//System.out.println("not inserting");
+//			return;
+//		}
 		
 		sql = "select id from users where fbid=? limit 1";
 		preparedStatement = connect.prepareStatement(sql);

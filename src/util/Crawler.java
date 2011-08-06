@@ -46,8 +46,6 @@ public class Crawler {
 
 	private String fbid = null;
 
-	ExecutorService executor = Executors.newCachedThreadPool();
-
 	public Crawler(Config conf) {
 		this.conf = conf;
 	}
