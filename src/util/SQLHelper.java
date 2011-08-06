@@ -43,7 +43,7 @@ public class SQLHelper {
 		preparedStatement.execute();
 	}
 
-	public void insertUser(Map<String, String> details) throws SQLException {
+	public synchronized void insertUser(Map<String, String> details) throws SQLException {
 		String sql = "select fbid from users where fbid=? limit 1";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, details.get("fbid"));
@@ -72,7 +72,7 @@ public class SQLHelper {
 		preparedStatement.execute();
 	}
 
-	public void insertFriends(ArrayList<String> friends, String fbid)
+	public synchronized void insertFriends(ArrayList<String> friends, String fbid)
 			throws SQLException {
 		
 		String sql = "select fbid from friends where fbid=? limit 1";

@@ -3,21 +3,24 @@ package logic;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import util.Config;
 import util.Crawler;
 import util.GraphCreator;
 import util.Printer;
 import util.SQLHelper;
-import util.URLGetter;
 import util.WriteToFile;
 
 public class Main {
 	private static Config conf = null;
-	private static Crawler crawl = null;
-	private static SQLHelper todb = null;
 	private static boolean webapp = false;
+	private static SQLHelper todb = null;
+	private static String token = null;
+	private static Crawler crawl = null;
 
 	/**
 	 * @param args
@@ -30,13 +33,21 @@ public class Main {
 			System.exit(1);
 		}
 
-		if (args.length == 3) {
+		else if (args.length == 3) {
 			webapp = true;
+			token = args[2];
 		}
+
+		else {
+			token = ((Long) (System.currentTimeMillis() / 1000L)).toString();
+		}
+
 		// Configuration of succulent
 		try {
 			conf = new Config();
 			conf.doConfig(args[1]);
+			crawl = new Crawler(conf);
+			todb = new SQLHelper();
 		} catch (IOException e) {
 			Printer.print("[X] Configuration error! Is the config file '"
 					+ args[1] + "' there?", webapp);
@@ -48,33 +59,40 @@ public class Main {
 		}
 
 		if (conf == null) {
-			Printer.print("[X] Something went wrong during configuration!", webapp);
+			Printer.print("[X] Something went wrong during configuration!",
+					webapp);
 			System.exit(1);
 		}
-		crawl = new Crawler(conf);
-		URLGetter patientZero = new URLGetter(conf.getFacebookProfileURL()
-				+ args[0], conf.getCookies());
-		String zeroPage = null;
+
+		// GO!
+		ExecutorService executor = Executors.newFixedThreadPool(15);
+		Future<ArrayList<String>> firstFriends = executor.submit(new Sucker(
+				conf, args[0], crawl, todb));
+
+		ArrayList<Future<ArrayList<String>>> parallel = new ArrayList<Future<ArrayList<String>>>();
+
 		try {
-			zeroPage = patientZero.call();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		crawl.setFBID(args[0]);
-		Map<String, String> details = crawl.getDetails(zeroPage);
-		ArrayList<String> friends = crawl.getFriends(zeroPage);
-		todb = new SQLHelper();
-		try {
-			todb.setConfig(conf);
-			todb.insertUser(details);
-			todb.insertFriends(friends, args[0]);
-		} catch (ClassNotFoundException e1) {
+			for (String friend : firstFriends.get()) {
+				parallel.add(executor.submit(new Sucker(conf, friend, crawl,
+						todb)));
+			}
+		} catch (InterruptedException e1) {
 			e1.printStackTrace();
-		} catch (SQLException e1) {
+		} catch (ExecutionException e1) {
 			e1.printStackTrace();
 		}
-		Printer.print("[!] Wrote user: " + details.get("name"), webapp);
-		recurse(friends);
+
+		for (Future<ArrayList<String>> newFriends : parallel) {
+			try {
+				newFriends.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// Write Graph
 		String graph = null;
 		try {
 			todb.resetGraphDB();
@@ -87,36 +105,8 @@ public class Main {
 			e.printStackTrace();
 		}
 		Printer.print("[!] Writing gexf file... ", webapp);
-		new WriteToFile()
-				.writeToFile(graph, conf.getGexfPath() + "/" + args[0]);
-	}
+		new WriteToFile().writeToFile(graph, conf.getGexfPath() + "/" + token);
+		executor.shutdown();
 
-	public static void recurse(ArrayList<String> friends) {
-		// first recurse
-		ArrayList<String> nextFriends = null;
-		for (String friend : friends) {
-			URLGetter nextPatient = new URLGetter(conf.getFacebookProfileURL()
-					+ friend, conf.getCookies());
-			String nextPage = null;
-			try {
-				nextPage = nextPatient.call();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			crawl.setFBID(friend);
-			Map<String, String> nextDetails = crawl.getDetails(nextPage);
-			nextFriends = crawl.getFriends(nextPage);
-
-			try {
-				todb.setConfig(conf);
-				todb.insertUser(nextDetails);
-				todb.insertFriends(nextFriends, friend);
-			} catch (ClassNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			Printer.print("[!] Wrote user: " + nextDetails.get("name"), webapp);
-		}
 	}
 }
