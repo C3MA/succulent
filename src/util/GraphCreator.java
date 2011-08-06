@@ -74,11 +74,11 @@ public class GraphCreator {
 		// Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
 
-		// Layout - 40 Yifan Hu passes
+		// Layout - 60 Yifan Hu passes
 		//YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
 		layout.setGraphModel(graphModel);
 		layout.resetPropertiesValues();
-		for (int i = 0; i < 40 && layout.canAlgo(); i++) {
+		for (int i = 0; i < 60 && layout.canAlgo(); i++) {
 			layout.goAlgo();
 		}
 
