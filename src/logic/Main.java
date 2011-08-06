@@ -3,6 +3,8 @@ package logic;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,29 +71,32 @@ public class Main {
 		Future<ArrayList<String>> firstFriends = executor.submit(new Sucker(
 				conf, args[0], crawl, todb));
 
-		ArrayList<Future<ArrayList<String>>> parallel = new ArrayList<Future<ArrayList<String>>>();
+		Map<String, Future<ArrayList<String>>> parallel = new HashMap<String, Future<ArrayList<String>>>();
 
 		try {
 			for (String friend : firstFriends.get()) {
-				parallel.add(executor.submit(new Sucker(conf, friend, crawl,
-						todb)));
+				parallel.put(friend,
+						executor.submit(new Sucker(conf, friend, crawl, todb)));
 			}
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		} catch (ExecutionException e1) {
 			e1.printStackTrace();
 		}
-
-		for (Future<ArrayList<String>> newFriends : parallel) {
+		for (Map.Entry<String, Future<ArrayList<String>>> entry : parallel
+				.entrySet()) {
 			try {
-				newFriends.get();
+				String fbid = entry.getKey();
+				ArrayList<String> friends = entry.getValue().get();
+				todb.insertFriends(friends, fbid);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
 				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		}
-
 		// Write Graph
 		String graph = null;
 		try {
@@ -106,7 +111,8 @@ public class Main {
 		}
 		Printer.print("[!] Writing gexf file... ", webapp);
 		new WriteToFile().writeToFile(graph, conf.getGexfPath() + "/" + token);
-		executor.shutdown();
 
+		executor.shutdown();
+		todb.die();
 	}
 }

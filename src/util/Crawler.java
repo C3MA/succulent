@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 
 public class Crawler {
 
-	private String common = "[&#;a-zA-Z0-9_\\-\\ ,/äöüßÄÖÜøéèêôáóíČŁâ\\.]{1,}";
+	private String common = "[&#;a-zA-Z0-9_\\-\\ ,/äöüßÄÖÜøéèêôáóíČŁâç\\.]{1,}";
 	private Pattern findNameRegex = Pattern.compile("<title>" + common);
 	private String htmlTags = "<[^>]*>";
 	private Pattern sexRegex = Pattern

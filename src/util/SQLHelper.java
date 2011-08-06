@@ -24,6 +24,14 @@ public class SQLHelper {
 				+ "user=" + this.conf.getUser() + "&password="
 				+ this.conf.getPass());
 	}
+	
+	public void die() {
+		try {
+			connect.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void resetGraphDB() throws SQLException {
 		String nodes = "truncate table nodes;";
@@ -34,8 +42,8 @@ public class SQLHelper {
 	}
 
 	public void createGraphDB(ArrayList<String> ids) throws SQLException {
-		String nodes = "insert ignore into nodes(id,label,url) select fbid,name,concat('http://www.facebook.com/profile.php?id=',fbid) from users;";
-		String edges = "insert ignore into edges select users.fbid as source, friends.friendfbid as target, '5' as weight, 'knows' as name from users join friends where friends.userid=users.id";
+		String nodes = "insert into nodes(id,label,url) select fbid,name,concat('http://www.facebook.com/profile.php?id=',fbid) from users;";
+		String edges = "insert into edges select users.fbid as source, friends.friendfbid as target, '5' as weight, 'knows' as name from users join friends where friends.userid=users.id";
 		preparedStatement = connect.prepareStatement(nodes);
 		preparedStatement.execute();
 		preparedStatement = connect.prepareStatement(edges);
@@ -44,7 +52,7 @@ public class SQLHelper {
 	}
 
 	public synchronized void insertUser(Map<String, String> details) throws SQLException {
-		String sql = "select fbid from users where fbid=? limit 1";
+		String sql = "select fbid from users where fbid=?";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, details.get("fbid"));
 		resultSet = preparedStatement.executeQuery();
@@ -52,7 +60,8 @@ public class SQLHelper {
 		while (resultSet.next()) {
 			fbid = resultSet.getString(1);
 		}
-		if (details.get("fbid") == fbid) {
+		
+		if (fbid != null && details.get("fbid").compareTo(fbid) == 0) {
 			return;
 		}
 		
@@ -83,7 +92,8 @@ public class SQLHelper {
 		while (resultSet.next()) {
 			checkfbid = resultSet.getString(1);
 		}
-		if (checkfbid == fbid) {
+		if (checkfbid != null && checkfbid.compareTo(fbid) == 0) {
+			//System.out.println("not inserting");
 			return;
 		}
 		
@@ -94,6 +104,7 @@ public class SQLHelper {
 		String userid = null;
 		while (resultSet.next()) {
 			userid = resultSet.getString(1);
+			//System.out.println(userid);
 		}
 
 		for (String friend : friends) {
