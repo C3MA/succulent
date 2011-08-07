@@ -3,8 +3,6 @@ package util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,8 +32,9 @@ public class Crawler {
 			.compile("Aus <[^>]*>[a-zA-Z0-9\\_\\-\\ äöüßÖÄÜø,/]{1,}");
 	private Pattern foneRegex = Pattern
 			.compile("Telefon</th><td class=\"data\"><ul class=\"uiList\"><li class=\"uiListItem  uiListVerticalItemBorder\">[\\ \\.0-9\\+\\-]{1,}");
-	// private Pattern facebookIDRegex = Pattern
-	// .compile("profile.php\\?id=[0-9]{1,}&amp;sk=info");
+	private Pattern facebookIDRegex = Pattern
+			.compile("ajax/profile/connect.php\\?profile\\_id=[0-9]{1,}");
+	private Pattern facebookIDAlt1Regex = Pattern.compile("profile-picture-overlay\\\">\\u003c\\/span>\\u003cimg class=\\\"photo img\\\" src\\=\\\"http:\\/\\/profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_[0-9]{1,}");
 	private Pattern friendCountRegex = Pattern.compile("Freunde \\([0-9]{1,4}");
 	private Pattern friendListRegex = Pattern
 			.compile("addfriend.php\\?id=[0-9]{1,}");
@@ -142,7 +141,14 @@ public class Crawler {
 	}
 
 	private String getFBID(String search) {
-		return this.fbid;
+		String fbid = getRegex(search, facebookIDRegex);
+		// friend button missing! Get fbid elsewhere...
+		if (fbid == null) {
+			fbid = getRegex(search, facebookIDAlt1Regex);
+			return fbid.replaceAll("profile-picture-overlay\\\">\\u003c\\/span>\\u003cimg class=\\\"photo img\\\" src\\=\\\"http:\\/\\/profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_", "");
+		}
+		return fbid
+				.replaceAll("ajax/profile/connect\\.php\\?profile\\_id=", "");
 	}
 
 	private String getPicture(String search) {
@@ -176,7 +182,7 @@ public class Crawler {
 		return new Integer(counting.replaceAll("Freunde \\(", ""));
 	}
 
-	public ArrayList<String> getFriends(String search) {
+	public ArrayList<String> getFriends(String search, String fbid) {
 		int friendCount = getFriendCount(search);
 		ArrayList<String> futureFriends = new ArrayList<String>();
 		for (int i = 0; i <= friendCount + 60; i += 59) {
@@ -203,10 +209,6 @@ public class Crawler {
 			}
 		}
 		return cleaned;
-	}
-
-	public void setFBID(String fbid) {
-		this.fbid = fbid;
 	}
 
 	public Map<String, String> getDetails(String page) {

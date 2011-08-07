@@ -22,7 +22,7 @@ public class Sucker implements Callable<ArrayList<String>> {
 		this.conf = conf;
 		this.fbid = fbid;
 		// This causes trouble with plenty of race conditions, workaround
-		this.crawl = new Crawler(conf);
+		this.crawl = crawl;
 		this.todb = todb;
 	}
 
@@ -35,9 +35,8 @@ public class Sucker implements Callable<ArrayList<String>> {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		crawl.setFBID(this.fbid);
 		Map<String, String> details = crawl.getDetails(zeroPage);
-		ArrayList<String> friends = crawl.getFriends(zeroPage);
+		ArrayList<String> friends = crawl.getFriends(zeroPage, this.fbid);
 		try {
 			todb.setConfig(conf);
 			todb.insertUser(details);
