@@ -5,8 +5,9 @@ This is pre alpha, don't expect too much...
 You need to specify a config file with the following information. 
 This is only tested against mysql. Get the cookie information from the browser.
 Succulent takes 2 args: A Facebook ID (the numeric one) and the path to the config file.
-On successful completion you will get a gexf file in the directory specified
-with the gexfpath variable in the config file containing the nodes and edges.
+On successful completion you will get a gexf file in the directory specified with the 
+gexfpath variable in the config file containing the nodes and edges. This can be viewed
+with GexfExplorer1.0.swf in flash/ or with http://gephi.org/.
 
 config file layout:
 db_user=<username>
