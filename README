@@ -1,3 +1,79 @@
 Succulent Facebook crawling tool 
 
 This is pre alpha, don't expect too much...
+
+You need to specify a config file with the following information. 
+This is only tested against mysql. Get the cookie information from the browser.
+Succulent takes 2 args: A Facebook ID (the numeric one) and the path to the config file.
+On successful completion you will get a gexf file in the directory specified
+with the gexfpath variable in the config file containing the nodes and edges.
+
+config file layout:
+db_user=<username>
+db_data=<databasename>
+db_pass=<password>
+db_host=<host>
+db_port=<port>
+cookie=x-referer=
+cookie=p=
+cookie=act=
+cookie=noscript=
+cookie=reg_fb_ref=
+cookie=L=
+cookie=W=
+cookie=m_user=
+cookie=locale=
+cookie=lu=
+cookie=datr=
+cookie=svid=
+gexfpath=/tmp
+
+Database layout:
+mysql> show columns from friends;
++------------+---------+------+-----+---------+----------------+
+| Field      | Type    | Null | Key | Default | Extra          |
++------------+---------+------+-----+---------+----------------+
+| id         | int(11) | NO   | PRI | NULL    | auto_increment |
+| userid     | text    | YES  |     | NULL    |                |
+| fbid       | text    | YES  |     | NULL    |                |
+| friendfbid | text    | YES  |     | NULL    |                |
++------------+---------+------+-----+---------+----------------+
+
+mysql> show columns from users;
++-----------+------------+------+-----+---------+----------------+
+| Field     | Type       | Null | Key | Default | Extra          |
++-----------+------------+------+-----+---------+----------------+
+| id        | int(11)    | NO   | PRI | NULL    | auto_increment |
+| name      | text       | YES  |     | NULL    |                |
+| pic       | text       | YES  |     | NULL    |                |
+| fbid      | text       | YES  |     | NULL    |                |
+| sex       | varchar(1) | YES  |     | NULL    |                |
+| crawltime | int(11)    | NO   |     | NULL    |                |
+| single    | text       | YES  |     | NULL    |                |
+| birth     | text       | YES  |     | NULL    |                |
+| mail      | text       | YES  |     | NULL    |                |
+| wants     | text       | YES  |     | NULL    |                |
+| works     | text       | YES  |     | NULL    |                |
+| origin    | text       | YES  |     | NULL    |                |
+| lives     | text       | YES  |     | NULL    |                |
++-----------+------------+------+-----+---------+----------------+
+
+You then need 2 tables for the graph algo to work:
+mysql> show columns from edges;
++--------+---------+------+-----+---------+-------+
+| Field  | Type    | Null | Key | Default | Extra |
++--------+---------+------+-----+---------+-------+
+| source | text    | YES  |     | NULL    |       |
+| target | text    | YES  |     | NULL    |       |
+| weight | int(11) | NO   |     | NULL    |       |
+| name   | text    | YES  |     | NULL    |       |
++--------+---------+------+-----+---------+-------+
+
+mysql> show columns from nodes;
++-------+------+------+-----+---------+-------+
+| Field | Type | Null | Key | Default | Extra |
++-------+------+------+-----+---------+-------+
+| label | text | NO   |     | NULL    |       |
+| url   | text | YES  |     | NULL    |       |
+| id    | text | YES  |     | NULL    |       |
++-------+------+------+-----+---------+-------+

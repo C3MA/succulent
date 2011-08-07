@@ -15,7 +15,6 @@ public class PicGetter implements Callable<byte[]> {
 	public PicGetter(String url, String cookie) {
 		this.cookie = cookie;
 		try {
-			//System.out.println(url);
 			this.url = new URL(url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

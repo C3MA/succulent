@@ -100,12 +100,7 @@ public class Main {
 		// Write Graph
 		String graph = null;
 		try {
-			try {
-				todb.setConfig(conf);
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			todb.setConfig(conf);
 			todb.resetGraphDB();
 			todb.createGraphDB(null);
 			GraphCreator creator = new GraphCreator(conf);
@@ -113,6 +108,8 @@ public class Main {
 			Printer.print("[!] Calculating graph... ", webapp);
 			graph = creator.createGraphFromSQL();
 		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		Printer.print("[!] Writing gexf file... ", webapp);

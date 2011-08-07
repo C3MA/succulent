@@ -68,8 +68,8 @@ public class GraphCreator {
 		Container container = importController.importDatabase(db,
 				edgeListImporter);
 		container.setAllowAutoNode(false); // Don't create missing nodes
-		container.getLoader().setEdgeDefault(EdgeDefault.UNDIRECTED); // Force
-		// UNDIRECTED
+		 // Force UNDIRECTED
+		container.getLoader().setEdgeDefault(EdgeDefault.UNDIRECTED);
 
 		// Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
