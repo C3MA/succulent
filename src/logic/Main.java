@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,11 +69,14 @@ public class Main {
 
 		// GO!
 		ExecutorService executor = Executors.newFixedThreadPool(15);
+
+		// Get Patient Zero
 		Future<ArrayList<String>> firstFriends = executor.submit(new Sucker(
 				conf, args[0], crawl, todb));
-
+		// used by the threads, this is the patient zero friend list
 		Map<String, Future<ArrayList<String>>> parallel = new HashMap<String, Future<ArrayList<String>>>();
 
+		// get the friends and make users out of them
 		try {
 			for (String friend : firstFriends.get()) {
 				parallel.put(friend,
@@ -83,12 +87,25 @@ public class Main {
 		} catch (ExecutionException e1) {
 			e1.printStackTrace();
 		}
+
+		// ArrayList<Callable<ArrayList<String>>> lastFriends = new
+		// ArrayList<Callable<ArrayList<String>>>();
+		// get the friends of the friends, not making them users
 		for (Map.Entry<String, Future<ArrayList<String>>> entry : parallel
 				.entrySet()) {
 			try {
+				// not so nice ...
 				String fbid = entry.getKey();
 				ArrayList<String> friends = entry.getValue().get();
 				todb.insertFriends(friends, fbid);
+
+				// TODO: use something like this to recurse once more
+				// ArrayList<String> friends = entry.getValue().get();
+				// for (String friendOfFriends : friends) {
+				// lastFriends.add(new Sucker(conf, friendOfFriends, crawl,
+				// todb));
+				// }
+				// executor.invokeAll(lastFriends);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -96,7 +113,9 @@ public class Main {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+
 		}
+
 		// Write Graph
 		String graph = null;
 		try {
@@ -118,4 +137,9 @@ public class Main {
 		executor.shutdown();
 		todb.die();
 	}
+
+	// TODO: how can we do this? specifying the depth would be nice
+	// private static void recurse(ArrayList<String> friends) {
+	//
+	// }
 }

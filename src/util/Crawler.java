@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Base64;
 public class Crawler {
 
 	private String common = "[&#;a-zA-Z0-9_\\-\\ ,/äöüßÄÖÜøéèêôáóíČŁâç\\.]{1,}";
-	private Pattern findNameRegex = Pattern.compile("<title>" + common);
+	private Pattern findNameRegex = Pattern.compile("<title>[^<]{1,}");
 	private String htmlTags = "<[^>]*>";
 	private Pattern sexRegex = Pattern
 			.compile("Geschlecht</th><td class=\"data\">.");
