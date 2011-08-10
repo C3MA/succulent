@@ -105,7 +105,7 @@ public class SQLHelper {
 		String userid = null;
 		while (resultSet.next()) {
 			userid = resultSet.getString(1);
-			System.out.println(userid);
+			//System.out.println(userid);
 		}
 
 		for (String friend : friends) {

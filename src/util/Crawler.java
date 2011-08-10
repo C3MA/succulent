@@ -165,7 +165,7 @@ public class Crawler {
 
 			fbid = getRegex(search, facebookIDAlt1Regex);
 			if (fbid == null) {
-				System.out.println(search);
+				//System.out.println(search);
 				fbid = getRegex(
 						search,
 						Pattern.compile("http://www.facebook.com/" + common
