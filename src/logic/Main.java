@@ -31,8 +31,7 @@ public class Main {
 	public static void main(String[] args) {
 
 		if (args.length < 2) {
-			System.out
-					.println("[X] Usage: succulent <FACEBOOKID> <PATH TO CONFIG FILE>");
+			Printer.print("[X] Usage: succulent <FACEBOOKID> <PATH TO CONFIG FILE>", false);
 			System.exit(1);
 		}
 

@@ -83,11 +83,11 @@ public class SQLHelper {
 	public synchronized void insertFriends(ArrayList<String> friends, String fbid)
 			throws SQLException {
 		
-		String sql = "select fbid from friends where fbid=? limit 1";
-		preparedStatement = connect.prepareStatement(sql);
-		preparedStatement.setString(1, fbid);
-		resultSet = preparedStatement.executeQuery();
-		
+//		String sql = "select fbid from friends where fbid=? limit 1";
+//		preparedStatement = connect.prepareStatement(sql);
+//		preparedStatement.setString(1, fbid);
+//		resultSet = preparedStatement.executeQuery();
+//		
 		// TODO: we cannot unique this, as the edges weight seems to depend on it
 //		String checkfbid = null;
 //		while (resultSet.next()) {
@@ -98,13 +98,14 @@ public class SQLHelper {
 //			return;
 //		}
 		
-		sql = "select id from users where fbid=? limit 1";
+		String sql = "select id from users where fbid=? limit 1";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, fbid);
 		resultSet = preparedStatement.executeQuery();
 		String userid = null;
 		while (resultSet.next()) {
 			userid = resultSet.getString(1);
+			System.out.println(userid);
 		}
 
 		for (String friend : friends) {

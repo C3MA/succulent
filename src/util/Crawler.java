@@ -33,17 +33,20 @@ public class Crawler {
 	private Pattern foneRegex = Pattern
 			.compile("Telefon</th><td class=\"data\"><ul class=\"uiList\"><li class=\"uiListItem  uiListVerticalItemBorder\">[\\ \\.0-9\\+\\-]{1,}");
 	private Pattern facebookIDRegex = Pattern
-			.compile("ajax/profile/connect.php\\?profile\\_id=[0-9]{1,}");
-	private Pattern facebookIDAlt1Regex = Pattern.compile("profile-picture-overlay\\\">\\u003c\\/span>\\u003cimg class=\\\"photo img\\\" src\\=\\\"http:\\/\\/profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_[0-9]{1,}");
+			.compile("connect.php\\?profile_id=[0-9]{1,}");
+	private Pattern facebookIDAlt1Regex = Pattern
+			.compile("profile.ak.fbcdn.net\\\\/[a-z0-9\\-]{1,}\\\\/[0-9]{1,}\\_[0-9]{1,}\\_[0-9]{1,}\\_..jpg");
 	private Pattern friendCountRegex = Pattern.compile("Freunde \\([0-9]{1,4}");
 	private Pattern friendListRegex = Pattern
 			.compile("addfriend.php\\?id=[0-9]{1,}");
 	private Pattern defaultPic = Pattern
 			.compile("http://profile.ak.fbcdn.net/static-ak/rsrc.php/[a-zA-Z0-9/\\.]{1,}gif");
+	private Pattern locationReplace = Pattern
+			.compile("<script>window.location.replace[.]{1,}");
 
 	private Config conf;
 
-	private String fbid = null;
+	// private String fbid = null;
 
 	public Crawler(Config conf) {
 		this.conf = conf;
@@ -52,8 +55,22 @@ public class Crawler {
 	private String getName(String search) {
 		String name = getRegex(search, findNameRegex);
 		if (name == null) {
-			System.out.println("[X] Name not found for " + fbid + " in: "
-					+ search);
+			// System.out.println("[X] Name not found for " + fbid + " in: "
+			// + search);
+			String temp = getRegex(search, locationReplace)
+					.replaceAll(
+							"<script>window.location.replace(\"http:\\/\\/www.facebook.com\\/",
+							"");
+			if (temp.length() > 0) {
+				URLGetter tempgetter = new URLGetter(
+						conf.getFacebookProfileURL() + temp, conf.getCookies());
+				try {
+					String page = tempgetter.call();
+					return getName(page);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			return "NULL";
 		}
 		return name.replaceAll(htmlTags, "");
@@ -142,13 +159,31 @@ public class Crawler {
 
 	private String getFBID(String search) {
 		String fbid = getRegex(search, facebookIDRegex);
-		// friend button missing! Get fbid elsewhere...
-		if (fbid == null) {
+		try {
+			return fbid.replaceAll("connect.php\\?profile_id=", "");
+		} catch (NullPointerException np) {
+
 			fbid = getRegex(search, facebookIDAlt1Regex);
-			return fbid.replaceAll("profile-picture-overlay\\\">\\u003c\\/span>\\u003cimg class=\\\"photo img\\\" src\\=\\\"http:\\/\\/profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_", "");
+			if (fbid == null) {
+				System.out.println(search);
+				fbid = getRegex(
+						search,
+						Pattern.compile("http://www.facebook.com/" + common
+								+ "?sk=info"));
+				fbid = fbid.replaceAll("http://www.facebook.com/", "");
+				fbid = fbid.replaceAll("?sk=info", "");
+			}
+			fbid = fbid
+					.replaceAll(
+							"profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_",
+							"");
+			fbid = fbid.replaceAll("\\_[0-9]{1,}\\_..jpg", "");
+
+			if (fbid == null || fbid.compareTo("") == 0) {
+				return "unknown";
+			}
+			return fbid;
 		}
-		return fbid
-				.replaceAll("ajax/profile/connect\\.php\\?profile\\_id=", "");
 	}
 
 	private String getPicture(String search) {
