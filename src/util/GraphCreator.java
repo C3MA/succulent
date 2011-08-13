@@ -37,7 +37,7 @@ public class GraphCreator {
 		db.setPasswd(conf.getPass());
 		db.setSQLDriver(new MySQLDriver());
 		db.setPort(conf.getPort());
-		db.setNodeQuery("SELECT nodes.id AS id, nodes.label AS label, nodes.url FROM nodes");
+		db.setNodeQuery("SELECT nodes.id AS id, nodes.label AS label, nodes.url, nodes.sex, nodes.single FROM nodes");
 		db.setEdgeQuery("SELECT edges.source AS source, edges.target AS target, edges.name AS label, edges.weight AS weight FROM edges");
 	}
 

@@ -39,7 +39,7 @@ public class URLGetter implements Callable<String> {
 		while ((line = r.readLine()) != null) {
 			sb.append(line);
 		}
-		return sb.toString();
+		return sb.toString().replaceAll("\\\\u003c", "<");
 	}
 
 }

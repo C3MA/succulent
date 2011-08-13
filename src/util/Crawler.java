@@ -1,5 +1,6 @@
 package util;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +15,12 @@ public class Crawler {
 	private Pattern findNameRegex = Pattern.compile("<title>[^<]{1,}");
 	private String htmlTags = "<[^>]*>";
 	private Pattern sexRegex = Pattern
-			.compile("Geschlecht</th><td class=\"data\">.");
+			.compile("Geschlecht<\\\\/th><td class=\\\\\"data\\\\\">.");
 	private String picPath = "http://profile.ak.fbcdn.net/hprofile-ak-[a-z0-9]{1,}/";
 	private Pattern singleRegex = Pattern
-			.compile("Beziehungsstatus</th><td class=\"data\">[a-zA-Z0-9\\_\\-\\ ]{1,}");
+			.compile("Beziehungsstatus<\\\\/th><td class=\\\\\"data\\\\\">[a-zA-Z0-9\\ \\-\\_]{1,}");
 	private Pattern singleRegexWith = Pattern
-			.compile("Beziehungsstatus</th><td class=\"data\">[a-zA-Z0-9\\_\\-\\ ]{1,}<[^>]*>"
+			.compile("Beziehungsstatus<\\\\/th><td class=\\\\\"data\\\\\">[a-zA-Z0-9\\_\\-\\ ]{1,}<[^>]*>"
 					+ common);
 	private Pattern livesRegex = Pattern.compile("Wohnt in <[^>]*>" + common);
 	private Pattern birthRegex = Pattern
@@ -80,17 +81,19 @@ public class Crawler {
 	private String getSex(String search) {
 		String sex = getRegex(search, sexRegex);
 		if (sex == null) {
+			//System.out.println(search);
 			return "0";
 		} else
-			return sex.replaceAll("Geschlecht</th><td class=\"data\">", "");
+			return sex.replaceAll("Geschlecht<\\\\/th><td class=\\\\\"data\\\\\">", "");
 	}
 
 	private String getSingle(String search) {
 		String single = getRegex(search, singleRegex);
 		if (single == null) {
+			//System.out.println(search);
 			return "NULL";
 		}
-		single = single.replaceAll("Beziehungsstatus</th><td class=\"data\">",
+		single = single.replaceAll("Beziehungsstatus<\\\\/th><td class=\\\\\"data\\\\\">",
 				"");
 
 		if (single.contains("mit")) {
