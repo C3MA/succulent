@@ -1,11 +1,12 @@
 package util;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.crypto.NullCipher;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -36,7 +37,7 @@ public class Crawler {
 	private Pattern facebookIDRegex = Pattern
 			.compile("connect.php\\?profile_id=[0-9]{1,}");
 	private Pattern facebookIDAlt1Regex = Pattern
-			.compile("profile.ak.fbcdn.net\\\\/[a-z0-9\\-]{1,}\\\\/[0-9]{1,}\\_[0-9]{1,}\\_[0-9]{1,}\\_..jpg");
+			.compile("profile.ak.fbcdn.net\\\\/[a-z0-9\\-]{1,}\\\\/[0-9]{1,}_[0-9]{1,}_[0-9]{1,}_..jpg");
 	private Pattern friendCountRegex = Pattern.compile("Freunde \\([0-9]{1,4}");
 	private Pattern friendListRegex = Pattern
 			.compile("addfriend.php\\?id=[0-9]{1,}");
@@ -81,20 +82,21 @@ public class Crawler {
 	private String getSex(String search) {
 		String sex = getRegex(search, sexRegex);
 		if (sex == null) {
-			//System.out.println(search);
+			// System.out.println(search);
 			return "0";
 		} else
-			return sex.replaceAll("Geschlecht<\\\\/th><td class=\\\\\"data\\\\\">", "");
+			return sex.replaceAll(
+					"Geschlecht<\\\\/th><td class=\\\\\"data\\\\\">", "");
 	}
 
 	private String getSingle(String search) {
 		String single = getRegex(search, singleRegex);
 		if (single == null) {
-			//System.out.println(search);
+			// System.out.println(search);
 			return "NULL";
 		}
-		single = single.replaceAll("Beziehungsstatus<\\\\/th><td class=\\\\\"data\\\\\">",
-				"");
+		single = single.replaceAll(
+				"Beziehungsstatus<\\\\/th><td class=\\\\\"data\\\\\">", "");
 
 		if (single.contains("mit")) {
 			single = getRegex(search, singleRegexWith).replaceAll(
@@ -165,28 +167,31 @@ public class Crawler {
 		try {
 			return fbid.replaceAll("connect.php\\?profile_id=", "");
 		} catch (NullPointerException np) {
+			//System.out.println("Fail 1");
+			try {
+				fbid = getRegex(search,
+						Pattern.compile("[0-9]{1,}&amp;sk=info"));
+				fbid = fbid.replaceAll("&amp;sk=info", "");
+				return fbid;
+			} catch (NullPointerException npe) {
+				//System.out.println("Fail 2");
+				fbid = getRegex(search, facebookIDAlt1Regex);
+				try {
+					fbid = fbid
+							.replaceAll(
+									"profile.ak.fbcdn.net\\\\/[a-z0-9\\-]{1,}\\\\/[0-9]{1,}\\_",
+									"");
+					fbid = fbid.replaceAll("\\_[0-9]{1,}\\_..jpg", "");
+					return fbid;
 
-			fbid = getRegex(search, facebookIDAlt1Regex);
-			if (fbid == null) {
-				//System.out.println(search);
-				fbid = getRegex(
-						search,
-						Pattern.compile("http://www.facebook.com/" + common
-								+ "?sk=info"));
-				fbid = fbid.replaceAll("http://www.facebook.com/", "");
-				fbid = fbid.replaceAll("?sk=info", "");
+				} catch (NullPointerException nullpe) {
+					//System.out.println("Fail 3");
+					//System.out.println(search);
+					return "Unknown";
+				}
 			}
-			fbid = fbid
-					.replaceAll(
-							"profile.ak.fbcdn.net\\/[a-z0-9\\-]{1,}\\/[0-9]{1,}\\_",
-							"");
-			fbid = fbid.replaceAll("\\_[0-9]{1,}\\_..jpg", "");
-
-			if (fbid == null || fbid.compareTo("") == 0) {
-				return "unknown";
-			}
-			return fbid;
 		}
+
 	}
 
 	private String getPicture(String search) {

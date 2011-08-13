@@ -1,6 +1,7 @@
 package util;
 
 import java.io.StringWriter;
+
 import org.gephi.graph.api.*;
 import org.gephi.io.database.drivers.MySQLDriver;
 import org.gephi.io.exporter.api.ExportController;
@@ -17,6 +18,10 @@ import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.gephi.layout.plugin.forceAtlas.ForceAtlasLayout;
 import org.gephi.layout.plugin.fruchterman.FruchtermanReingold;
 import org.gephi.layout.spi.Layout;
+import org.gephi.preview.PreviewModelImpl;
+import org.gephi.preview.api.Colorizer;
+import org.gephi.preview.api.ColorizerFactory;
+import org.gephi.preview.api.EdgeColorizer;
 import org.gephi.project.api.*;
 import org.openide.util.Lookup;
 
@@ -68,12 +73,25 @@ public class GraphCreator {
 		Container container = importController.importDatabase(db,
 				edgeListImporter);
 		container.setAllowAutoNode(false); // Don't create missing nodes
+		
 		 // Force UNDIRECTED
 		container.getLoader().setEdgeDefault(EdgeDefault.UNDIRECTED);
 
 		// Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
-
+		NodeIterator ni = graphModel.getGraph().getNodes().iterator();
+		while (ni.hasNext()) {
+			Node foo = ni.next();
+			String sex = ((String)foo.getNodeData().getAttributes().getValue("sex"));
+			if (sex.compareTo("M") == 0) {
+				foo.getNodeData().setColor(0, 0, 1);
+			}
+			
+			else if (sex.compareTo("W") == 0) {
+				foo.getNodeData().setColor(1, 0, 1);
+			}
+		}	
+		
 		// Layout - 100 Yifan Hu passes
 		layout = new YifanHuLayout(null, new StepDisplacement(1f));
 		layout.setGraphModel(graphModel);
@@ -93,15 +111,13 @@ public class GraphCreator {
 		result = result.replaceAll("for=\"url\"", "id=\"url\"");
 		return result;
 	}
-	
+
 	public void setLayout(String layout) {
 		if (layout == "fruchterman") {
 			this.layout = new FruchtermanReingold(null);
-		}
-		else if (layout == "atlas") {
+		} else if (layout == "atlas") {
 			this.layout = new ForceAtlasLayout(null);
-		}
-		else {
+		} else {
 			this.layout = new YifanHuLayout(null, new StepDisplacement(1f));
 		}
 	}
