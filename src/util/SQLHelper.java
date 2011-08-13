@@ -24,7 +24,7 @@ public class SQLHelper {
 				+ "user=" + this.conf.getUser() + "&password="
 				+ this.conf.getPass());
 	}
-	
+
 	public void die() {
 		try {
 			connect.close();
@@ -39,6 +39,7 @@ public class SQLHelper {
 		Statement stmt = connect.createStatement();
 		stmt.execute(nodes);
 		stmt.execute(edges);
+		stmt.close();
 	}
 
 	public void createGraphDB(ArrayList<String> ids) throws SQLException {
@@ -48,9 +49,12 @@ public class SQLHelper {
 		preparedStatement.execute();
 		preparedStatement = connect.prepareStatement(edges);
 		preparedStatement.execute();
+		preparedStatement.close();
+
 	}
 
-	public synchronized void insertUser(Map<String, String> details) throws SQLException {
+	public synchronized void insertUser(Map<String, String> details)
+			throws SQLException {
 		String sql = "select fbid from users where fbid=?";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, details.get("fbid"));
@@ -59,11 +63,11 @@ public class SQLHelper {
 		while (resultSet.next()) {
 			fbid = resultSet.getString(1);
 		}
-		
+
 		if (fbid != null && details.get("fbid").compareTo(fbid) == 0) {
 			return;
 		}
-		
+
 		sql = "insert into users(name, fbid, sex, pic, crawltime, single, lives, birth, mail, wants, origin) values(?,?,?,?,?,?,?,?,?,?,?)";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, details.get("name"));
@@ -78,26 +82,29 @@ public class SQLHelper {
 		preparedStatement.setString(10, details.get("wants"));
 		preparedStatement.setString(11, details.get("origin"));
 		preparedStatement.execute();
+		preparedStatement.close();
+
 	}
 
-	public synchronized void insertFriends(ArrayList<String> friends, String fbid)
-			throws SQLException {
-		
-//		String sql = "select fbid from friends where fbid=? limit 1";
-//		preparedStatement = connect.prepareStatement(sql);
-//		preparedStatement.setString(1, fbid);
-//		resultSet = preparedStatement.executeQuery();
-//		
-		// TODO: we cannot unique this, as the edges weight seems to depend on it
-//		String checkfbid = null;
-//		while (resultSet.next()) {
-//			checkfbid = resultSet.getString(1);
-//		}
-//		if (checkfbid != null && checkfbid.compareTo(fbid) == 0) {
-//			//System.out.println("not inserting");
-//			return;
-//		}
-		
+	public synchronized void insertFriends(ArrayList<String> friends,
+			String fbid) throws SQLException {
+
+		// String sql = "select fbid from friends where fbid=? limit 1";
+		// preparedStatement = connect.prepareStatement(sql);
+		// preparedStatement.setString(1, fbid);
+		// resultSet = preparedStatement.executeQuery();
+		//
+		// TODO: we cannot unique this, as the edges weight seems to depend on
+		// it
+		// String checkfbid = null;
+		// while (resultSet.next()) {
+		// checkfbid = resultSet.getString(1);
+		// }
+		// if (checkfbid != null && checkfbid.compareTo(fbid) == 0) {
+		// //System.out.println("not inserting");
+		// return;
+		// }
+
 		String sql = "select id from users where fbid=? limit 1";
 		preparedStatement = connect.prepareStatement(sql);
 		preparedStatement.setString(1, fbid);
@@ -105,7 +112,7 @@ public class SQLHelper {
 		String userid = null;
 		while (resultSet.next()) {
 			userid = resultSet.getString(1);
-			//System.out.println(userid);
+			// System.out.println(userid);
 		}
 
 		for (String friend : friends) {
@@ -115,6 +122,7 @@ public class SQLHelper {
 			preparedStatement.setString(2, fbid);
 			preparedStatement.setString(3, friend);
 			preparedStatement.execute();
+			preparedStatement.close();
 		}
 
 	}
