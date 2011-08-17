@@ -59,7 +59,17 @@ mysql> show columns from users;
 | lives     | text       | YES  |     | NULL    |                |
 +-----------+------------+------+-----+---------+----------------+
 
-You then need 2 tables for the graph algo to work:
+mysql> show columns from nodes;
++--------+------------+------+-----+---------+-------+
+| Field  | Type       | Null | Key | Default | Extra |
++--------+------------+------+-----+---------+-------+
+| label  | text       | NO   |     | NULL    |       |
+| url    | text       | YES  |     | NULL    |       |
+| id     | text       | YES  |     | NULL    |       |
+| sex    | varchar(1) | YES  |     | NULL    |       |
+| single | text       | YES  |     | NULL    |       |
++--------+------------+------+-----+---------+-------+
+
 mysql> show columns from edges;
 +--------+---------+------+-----+---------+-------+
 | Field  | Type    | Null | Key | Default | Extra |
@@ -69,12 +79,3 @@ mysql> show columns from edges;
 | weight | int(11) | NO   |     | NULL    |       |
 | name   | text    | YES  |     | NULL    |       |
 +--------+---------+------+-----+---------+-------+
-
-mysql> show columns from nodes;
-+-------+------+------+-----+---------+-------+
-| Field | Type | Null | Key | Default | Extra |
-+-------+------+------+-----+---------+-------+
-| label | text | NO   |     | NULL    |       |
-| url   | text | YES  |     | NULL    |       |
-| id    | text | YES  |     | NULL    |       |
-+-------+------+------+-----+---------+-------+
