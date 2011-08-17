@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+//import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,7 +31,9 @@ public class Main {
 	public static void main(String[] args) {
 
 		if (args.length < 2) {
-			Printer.print("[X] Usage: succulent <FACEBOOKID> <PATH TO CONFIG FILE>", false);
+			Printer.print(
+					"[X] Usage: succulent <FACEBOOKID> <PATH TO CONFIG FILE>",
+					false);
 			System.exit(1);
 		}
 
@@ -75,7 +77,7 @@ public class Main {
 		// used by the threads, this is the patient zero friend list
 		Map<String, Future<ArrayList<String>>> parallel = new HashMap<String, Future<ArrayList<String>>>();
 
-		// get the friends and make users out of them
+		// get the friends and convert them to users
 		try {
 			for (String friend : firstFriends.get()) {
 				parallel.put(friend,
@@ -98,13 +100,15 @@ public class Main {
 				ArrayList<String> friends = entry.getValue().get();
 				todb.insertFriends(friends, fbid);
 
-				// TODO: use something like this to recurse once more
+				// use something like this to recurse once more, however, this
+				// will grow VERY big quite fast! Beware!
 				// ArrayList<String> friends = entry.getValue().get();
 				// for (String friendOfFriends : friends) {
 				// lastFriends.add(new Sucker(conf, friendOfFriends, crawl,
 				// todb));
 				// }
 				// executor.invokeAll(lastFriends);
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -136,9 +140,4 @@ public class Main {
 		executor.shutdown();
 		todb.die();
 	}
-
-	// TODO: how can we do this? specifying the depth would be nice
-	// private static void recurse(ArrayList<String> friends) {
-	//
-	// }
 }

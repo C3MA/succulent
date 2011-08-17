@@ -18,10 +18,6 @@ import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.gephi.layout.plugin.forceAtlas.ForceAtlasLayout;
 import org.gephi.layout.plugin.fruchterman.FruchtermanReingold;
 import org.gephi.layout.spi.Layout;
-import org.gephi.preview.PreviewModelImpl;
-import org.gephi.preview.api.Colorizer;
-import org.gephi.preview.api.ColorizerFactory;
-import org.gephi.preview.api.EdgeColorizer;
 import org.gephi.project.api.*;
 import org.openide.util.Lookup;
 
