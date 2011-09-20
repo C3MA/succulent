@@ -44,7 +44,7 @@ public class SQLHelper {
 
 	public void createGraphDB(ArrayList<String> ids) throws SQLException {
 		String nodes = "insert into nodes(id,label,url,sex,single) select fbid,name,concat('http://www.facebook.com/profile.php?id=',fbid),sex,single from users;";
-		String edges = "insert into edges select users.fbid as source, friends.friendfbid as target, '5' as weight, 'knows' as name from users join friends where friends.userid=users.id";
+		String edges = "insert into edges select distinct users.fbid as source, friends.friendfbid as target, '5' as weight, 'knows' as name from users join friends where friends.userid=users.id";
 		preparedStatement = connect.prepareStatement(nodes);
 		preparedStatement.execute();
 		preparedStatement = connect.prepareStatement(edges);

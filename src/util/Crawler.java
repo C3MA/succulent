@@ -38,7 +38,7 @@ public class Crawler {
 			.compile("profile.ak.fbcdn.net\\\\/[a-z0-9\\-]{1,}\\\\/[0-9]{1,}_[0-9]{1,}_[0-9]{1,}_..jpg");
 	private Pattern friendCountRegex = Pattern.compile("Freunde \\([0-9]{1,4}");
 	private Pattern friendListRegex = Pattern
-			.compile("addfriend.php\\?id=[0-9]{1,}");
+			.compile("user.php\\?id=[0-9]{1,}");
 	private Pattern defaultPic = Pattern
 			.compile("http://profile.ak.fbcdn.net/static-ak/rsrc.php/[a-zA-Z0-9/\\.]{1,}gif");
 	private Pattern locationReplace = Pattern
@@ -227,6 +227,7 @@ public class Crawler {
 		int friendCount = getFriendCount(search);
 		ArrayList<String> futureFriends = new ArrayList<String>();
 		for (int i = 0; i <= friendCount + 60; i += 59) {
+			// http://www.facebook.com//ajax/browser/list/friends/all/?uid=1192256685&offset=180&dual=1&__a=1
 			String friendurl = "http://www.facebook.com/ajax/browser/list/friends/all/?uid="
 					+ fbid + "&offset=" + i + "&dual=1&__a=1";
 			try {
@@ -238,13 +239,12 @@ public class Crawler {
 		}
 		String dirty = null;
 		for (String futureFriend : futureFriends) {
-
-			dirty += futureFriend.replaceAll("addfriend.php",
-					"\r\naddfriend.php");
+			dirty += futureFriend.replaceAll("user.php",
+					"\r\nuser.php");
 		}
 		ArrayList<String> cleaned = new ArrayList<String>();
 		for (String clean : getAllRegex(dirty, friendListRegex)) {
-			String temp = clean.replaceAll("addfriend.php\\?id=", "");
+			String temp = clean.replaceAll("user.php\\?id=", "");
 			if (!cleaned.contains(temp)) {
 				cleaned.add(temp);
 			}
